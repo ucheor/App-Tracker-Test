@@ -56,7 +56,7 @@ body {
 }
 
 /* ─── Layout ─── */
-.page-wrap{max-width:980px;margin:0 auto;padding:28px 20px 56px}
+.page-wrap{max-width:1305px;margin:0 auto;padding:28px 20px 56px}
 
 /* ─── Header ─── */
 .header {
@@ -81,23 +81,32 @@ body {
 [data-theme="dark"] .toggle-knob{left:24px}
 
 /* ─── Summary Row ─── */
-.summary-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
-.summary-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:16px 10px;text-align:center;box-shadow:var(--shadow);transition:background .4s,border-color .4s,box-shadow .4s,transform .2s}
+.summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.summary-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:10px 8px;text-align:center;box-shadow:var(--shadow);transition:background .4s,border-color .4s,box-shadow .4s,transform .2s}
 .summary-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
-.summary-card .badge{display:inline-flex;align-items:center;gap:4px;font-size:.70rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;border-radius:20px;padding:3px 10px;margin-bottom:6px}
+.summary-card.clickable{cursor:pointer}
+.summary-card.clickable:active{transform:translateY(0)}
+.summary-card .badge{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;border-radius:20px;padding:2px 9px;margin-bottom:3px}
 .badge-green{background:rgba(76,175,122,.15);color:#3d9a6a}
 .badge-red{background:rgba(239,91,91,.15);color:#d64545}
 .badge-amber{background:rgba(245,166,35,.15);color:#d48f1a}
-.summary-card .count{font-family:'Quicksand',sans-serif;font-size:2rem;font-weight:700;color:var(--text-primary);transition:color .4s}
-.summary-card .label{font-size:.76rem;color:var(--text-muted);font-weight:600;margin-top:2px;transition:color .4s}
+.badge-all{background:rgba(107,91,122,.12);color:#6b5b7a}
+[data-theme="dark"] .badge-all{background:rgba(196,181,212,.15);color:#c4b5d4}
+.summary-card .count{font-family:'Quicksand',sans-serif;font-size:1.6rem;font-weight:700;color:var(--text-primary);transition:color .4s}
+.summary-card .label{font-size:.73rem;color:var(--text-muted);font-weight:600;margin-top:1px;transition:color .4s}
+.summary-card .clear-hint{font-size:.63rem;color:var(--text-muted);font-weight:600;margin-top:3px;opacity:.7;transition:color .4s,opacity .2s}
+.summary-card.clickable:hover .clear-hint{opacity:1;color:var(--text-secondary)}
+/* dim the All card when no filters are active (nothing to clear) */
+.summary-card.all-card.no-filters{opacity:.45}
+.summary-card.all-card.no-filters:hover{opacity:.45;transform:none;box-shadow:var(--shadow)}
 
 /* ─── Section Row ─── */
 .section-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .section-row h2{font-family:'Quicksand',sans-serif;font-size:.95rem;font-weight:700;color:var(--text-secondary);transition:color .4s}
 .last-updated{font-size:.72rem;color:var(--text-muted);font-weight:600;transition:color .4s}
 
-/* ─── App Grid  3 per row ─── */
-.app-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px}
+/* ─── App Grid  4 per row ─── */
+.app-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:18px}
 
 /* ─── App Card ─── */
 .app-card {
@@ -172,11 +181,17 @@ body {
 @keyframes fadeSlideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* ─── Responsive ─── */
-@media(max-width:720px){
-  .app-grid{grid-template-columns:1fr 1fr}
+@media(max-width:960px){
+  .app-grid{grid-template-columns:1fr 1fr 1fr}
+  .summary-row{grid-template-columns:repeat(3,1fr)}
 }
-@media(max-width:480px){
+@media(max-width:660px){
+  .app-grid{grid-template-columns:1fr 1fr}
+  .summary-row{grid-template-columns:1fr 1fr}
+}
+@media(max-width:420px){
   .app-grid{grid-template-columns:1fr}
+  .summary-row{grid-template-columns:1fr 1fr}
   .page-wrap{padding:20px 14px 48px}
   .header{padding:14px 18px}
 }
@@ -233,6 +248,12 @@ body {
 
   <!-- Summary -->
   <div class="summary-row">
+    <div class="summary-card clickable all-card no-filters" id="card-all" onclick="clearFilters()">
+      <div class="badge badge-all">◆ All</div>
+      <div class="count" id="count-all">24</div>
+      <div class="label">Total Apps</div>
+      <div class="clear-hint">click to clear filters</div>
+    </div>
     <div class="summary-card">
       <div class="badge badge-green">● Operational</div>
       <div class="count" id="count-op">0</div>
@@ -284,21 +305,21 @@ const applications = [
   { name: "Splunk-AWS-DTRA",      status: "up",    category: "Monitoring"     },
   { name: "Grafana-On-Prem",      status: "up",    category: "Monitoring"     },
   { name: "Grafana-DTRA",         status: "up",    category: "Monitoring"     },
-  { name: "PrismaCloud-On-Prem",  status: "maintenance",    category: "Security"       },
+  { name: "PrismaCloud-On-Prem",  status: "up",    category: "Security"       },
   { name: "PrismaCloud-DTRA",     status: "up",    category: "Security"       },
   { name: "Rancher-AWS",          status: "up",    category: "Infrastructure" },
   { name: "Coder-On-Prem",        status: "up",    category: "Infrastructure" },
   { name: "Sonarqube-DEPOT",      status: "down",    category: "CI/CD"          },
   { name: "MINES-env3",           status: "up",    category: "Applications"   },
-  { name: "MINES-env2",           status: "up",    category: "Applications"   },
+  { name: "MINES-env2",           status: "maintenance",    category: "Applications"   },
   { name: "MINES-env1",           status: "up",    category: "Applications"   },
   { name: "MINES-TEST",           status: "up",    category: "Applications"   },
   { name: "MINES-STAGING",        status: "up",    category: "Applications"   },
   { name: "MINES-PROD",           status: "up",    category: "Applications"   },
   { name: "Keycloak-env3",        status: "up",    category: "Security"       },
   { name: "Keycloak-env2",        status: "up",    category: "Security"       },
-  { name: "Keycloak-env1",        status: "up",    category: "Security"       },
-  { name: "Keycloak-test",        status: "maintenance",    category: "Security"       },
+  { name: "Keycloak-env1",        status: "maintenance",    category: "Security"       },
+  { name: "Keycloak-test",        status: "up",    category: "Security"       },
   { name: "Keycloak-coresvcs",    status: "up",    category: "Security"       },
   { name: "Keycloak-prod",        status: "up",    category: "Security"       },
   { name: "Firewall-0",           status: "up",    category: "Security"       },
@@ -341,7 +362,7 @@ function buildPills() {
     p.className = 'pill' + (f.key === activeType ? ' active' : '');
     p.textContent = (f.icon ? f.icon + ' ' : '') + f.label;
     p.dataset.key = f.key;
-    p.addEventListener('click', () => { activeType = f.key; syncPills(); renderCards(); });
+    p.addEventListener('click', () => { activeType = f.key; syncPills(); syncAllCard(); renderCards(); });
     typeRow.appendChild(p);
   });
 
@@ -351,7 +372,7 @@ function buildPills() {
     p.textContent = f.label;
     p.dataset.key = f.key;
     p.dataset.cls = f.cls || '';
-    p.addEventListener('click', () => { activeStatus = f.key; syncPills(); renderCards(); });
+    p.addEventListener('click', () => { activeStatus = f.key; syncPills(); syncAllCard(); renderCards(); });
     statusRow.appendChild(p);
   });
 }
@@ -364,6 +385,22 @@ function syncPills() {
   document.querySelectorAll('#pills-status .pill').forEach(p => {
     p.classList.toggle('active', p.dataset.key === activeStatus);
   });
+}
+
+// ─── Clear all filters ───
+function clearFilters() {
+  activeType   = 'all';
+  activeStatus = 'all';
+  syncPills();
+  syncAllCard();
+  renderCards();
+}
+
+// ─── Dim/enable the All card based on whether filters are active ───
+function syncAllCard() {
+  const card = document.getElementById('card-all');
+  const filtersActive = (activeType !== 'all' || activeStatus !== 'all');
+  card.classList.toggle('no-filters', !filtersActive);
 }
 
 // ─── Filter + render cards ───
@@ -403,6 +440,7 @@ function renderCards() {
 function renderSummary() {
   const c = { up:0, down:0, maintenance:0 };
   applications.forEach(a => c[a.status]++);
+  document.getElementById('count-all').textContent   = applications.length;
   document.getElementById('count-op').textContent    = c.up;
   document.getElementById('count-down').textContent  = c.down;
   document.getElementById('count-maint').textContent = c.maintenance;
