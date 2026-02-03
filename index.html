@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infrastructure Status Board</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: #718096;
+            font-size: 1.1em;
+        }
+
+        .timestamp {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-card {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .status-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .status-card.up {
+            border-color: #48bb78;
+            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+        }
+
+        .status-card.down {
+            border-color: #f56565;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        }
+
+        .status-card.maintenance {
+            border-color: #ed8936;
+            background: linear-gradient(135deg, #fffaf0 0%, #feebc8 100%);
+        }
+
+        .app-info {
+            flex: 1;
+        }
+
+        .app-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .app-status {
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .status-card.up .app-status {
+            color: #22543d;
+        }
+
+        .status-card.down .app-status {
+            color: #742a2a;
+        }
+
+        .status-card.maintenance .app-status {
+            color: #7c2d12;
+        }
+
+        .status-icon {
+            font-size: 2.5em;
+            margin-left: 15px;
+        }
+
+        .status-card.up .status-icon {
+            color: #48bb78;
+        }
+
+        .status-card.down .status-icon {
+            color: #f56565;
+        }
+
+        .status-card.maintenance .status-icon {
+            color: #ed8936;
+        }
+
+        .summary {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+            border-radius: 12px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 15px 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .summary-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .summary-item.up .summary-number {
+            color: #48bb78;
+        }
+
+        .summary-item.down .summary-number {
+            color: #f56565;
+        }
+
+        .summary-item.maintenance .summary-number {
+            color: #ed8936;
+        }
+
+        .summary-label {
+            color: #718096;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #edf2f7;
+            border-radius: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+            color: #4a5568;
+        }
+
+        .legend-icon {
+            font-size: 1.5em;
+        }
+
+        @media (max-width: 768px) {
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖥️ Infrastructure Status Board</h1>
+            <div class="subtitle">Miriam's App Tracker Dashboard Test</div>
+        </div>
+
+        <div class="timestamp">
+            Last Updated: <span id="lastUpdated"></span>
+        </div>
+
+        <div class="status-grid" id="statusGrid">
+            <!-- Status cards will be inserted here by JavaScript -->
+        </div>
+
+        <div class="summary">
+            <div class="summary-item up">
+                <div class="summary-number" id="upCount">0</div>
+                <div class="summary-label">Operational</div>
+            </div>
+            <div class="summary-item down">
+                <div class="summary-number" id="downCount">0</div>
+                <div class="summary-label">Down</div>
+            </div>
+            <div class="summary-item maintenance">
+                <div class="summary-number" id="maintenanceCount">0</div>
+                <div class="summary-label">Maintenance</div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-icon" style="color: #48bb78;">↑</span>
+                <span>Operational</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon" style="color: #f56565;">↓</span>
+                <span>Down</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon" style="color: #ed8936;">⚠</span>
+                <span>Maintenance</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application list
+        const applications = [
+            { name: "Vulcan Gitlab", status: "down" },
+            { name: "APP CI Pipelines", status: "down" },
+            { name: "Splunk-AWS-DTRA", status: "up" },
+            { name: "Grafana-On-Prem", status: "up" },
+            { name: "Grafana-DTRA", status: "up" },
+            { name: "PrismaCloud-On-Prem", status: "up" },
+            { name: "PrismaCloud-DTRA", status: "up" },
+            { name: "Rancher-AWS", status: "up" },
+            { name: "Coder-On-Prem", status: "up" },
+            { name: "Sonarqube-DEPOT", status: "up" },
+            { name: "MINES-env3", status: "up" },
+            { name: "MINES-env2", status: "up" },
+            { name: "MINES-env1", status: "up" },
+            { name: "MINES-TEST", status: "up" },
+            { name: "MINES-STAGING", status: "up" },
+            { name: "MINES-PROD", status: "up" },
+            { name: "Keycloak-env3", status: "up" },
+            { name: "Keycloak-env2", status: "up" },
+            { name: "Keycloak-env1", status: "up" },
+            { name: "Keycloak-test", status: "up" },
+            { name: "Keycloak-coresvcs", status: "up" },
+            { name: "Keycloak-prod", status: "up" },
+            { name: "Firewall-0", status: "up" },
+            { name: "Firewall-1", status: "up" }
+        ];
+
+        // Function to get status icon
+        function getStatusIcon(status) {
+            switch(status) {
+                case 'up':
+                    return '↑';
+                case 'down':
+                    return '↓';
+                case 'maintenance':
+                    return '⚠';
+                default:
+                    return '?';
+            }
+        }
+
+        // Function to get status text
+        function getStatusText(status) {
+            switch(status) {
+                case 'up':
+                    return 'Operational';
+                case 'down':
+                    return 'Down';
+                case 'maintenance':
+                    return 'Maintenance';
+                default:
+                    return 'Unknown';
+            }
+        }
+
+        // Function to render status cards
+        function renderStatusCards() {
+            const grid = document.getElementById('statusGrid');
+            grid.innerHTML = '';
+            
+            let upCount = 0;
+            let downCount = 0;
+            let maintenanceCount = 0;
+
+            applications.forEach(app => {
+                const card = document.createElement('div');
+                card.className = `status-card ${app.status}`;
+                card.onclick = () => toggleStatus(app.name);
+                
+                card.innerHTML = `
+                    <div class="app-info">
+                        <div class="app-name">${app.name}</div>
+                        <div class="app-status">${getStatusText(app.status)}</div>
+                    </div>
+                    <div class="status-icon">${getStatusIcon(app.status)}</div>
+                `;
+                
+                grid.appendChild(card);
+
+                // Count statuses
+                if (app.status === 'up') upCount++;
+                else if (app.status === 'down') downCount++;
+                else if (app.status === 'maintenance') maintenanceCount++;
+            });
+
+            // Update summary counts
+            document.getElementById('upCount').textContent = upCount;
+            document.getElementById('downCount').textContent = downCount;
+            document.getElementById('maintenanceCount').textContent = maintenanceCount;
+        }
+
+        // Function to toggle status (for demonstration - click on a card to change its status)
+        function toggleStatus(appName) {
+            const app = applications.find(a => a.name === appName);
+            if (app) {
+                if (app.status === 'up') app.status = 'down';
+                else if (app.status === 'down') app.status = 'maintenance';
+                else app.status = 'up';
+                
+                renderStatusCards();
+                updateTimestamp();
+            }
+        }
+
+        // Function to update timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = now.toLocaleString();
+        }
+
+        // Initialize
+        renderStatusCards();
+        updateTimestamp();
+
+        // Auto-refresh timestamp every minute
+        setInterval(updateTimestamp, 60000);
+    </script>
+</body>
+</html>
