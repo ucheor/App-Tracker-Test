@@ -100,6 +100,39 @@ body {
 .summary-card.all-card.no-filters{opacity:.45}
 .summary-card.all-card.no-filters:hover{opacity:.45;transform:none;box-shadow:var(--shadow)}
 
+/* ─── Summary card active highlights ─── */
+.summary-card.active-filter{border-width:2px}
+/* green — Operational */
+.summary-card.sc-op.active-filter{
+  background:linear-gradient(145deg,rgba(76,175,122,.13),rgba(76,175,122,.06));
+  border-color:#4caf7a;
+  box-shadow:0 4px 16px rgba(76,175,122,.28);
+}
+.summary-card.sc-op.active-filter .count{color:#3d9a6a}
+/* red — Down */
+.summary-card.sc-down.active-filter{
+  background:linear-gradient(145deg,rgba(239,91,91,.13),rgba(239,91,91,.06));
+  border-color:#ef5b5b;
+  box-shadow:0 4px 16px rgba(239,91,91,.28);
+}
+.summary-card.sc-down.active-filter .count{color:#d64545}
+/* amber — Maintenance */
+.summary-card.sc-maint.active-filter{
+  background:linear-gradient(145deg,rgba(245,166,35,.13),rgba(245,166,35,.06));
+  border-color:#f5a623;
+  box-shadow:0 4px 16px rgba(245,166,35,.28);
+}
+.summary-card.sc-maint.active-filter .count{color:#d48f1a}
+/* purple — All (active when ANY filter is on, so it's always "reachable") */
+.summary-card.all-card.active-filter{
+  background:linear-gradient(145deg,rgba(107,91,122,.13),rgba(107,91,122,.06));
+  border-color:#6b5b7a;
+  box-shadow:0 4px 16px rgba(107,91,122,.28);
+  opacity:1 !important;
+}
+.summary-card.all-card.active-filter .count{color:#6b5b7a}
+[data-theme="dark"] .summary-card.all-card.active-filter .count{color:#c4b5d4}
+
 /* ─── Section Row ─── */
 .section-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .section-row h2{font-family:'Quicksand',sans-serif;font-size:.95rem;font-weight:700;color:var(--text-secondary);transition:color .4s}
@@ -254,17 +287,17 @@ body {
       <div class="label">Total Apps</div>
       <div class="clear-hint">click to clear filters</div>
     </div>
-    <div class="summary-card">
+    <div class="summary-card clickable sc-op" id="card-op" onclick="toggleSummaryFilter('up')">
       <div class="badge badge-green">● Operational</div>
       <div class="count" id="count-op">0</div>
       <div class="label">Running</div>
     </div>
-    <div class="summary-card">
+    <div class="summary-card clickable sc-down" id="card-down" onclick="toggleSummaryFilter('down')">
       <div class="badge badge-red">● Down</div>
       <div class="count" id="count-down">0</div>
       <div class="label">Down</div>
     </div>
-    <div class="summary-card">
+    <div class="summary-card clickable sc-maint" id="card-maint" onclick="toggleSummaryFilter('maintenance')">
       <div class="badge badge-amber">● Maintenance</div>
       <div class="count" id="count-maint">0</div>
       <div class="label">Maintenance</div>
@@ -301,18 +334,18 @@ body {
 // ─────────────────────────────────────────────────────
 const applications = [
   { name: "Vulcan Gitlab",        status: "down",  category: "CI/CD"          },
-  { name: "APP CI Pipelines",     status: "maintenance",  category: "CI/CD"          },
-  { name: "Splunk-AWS-DTRA",      status: "up",    category: "Monitoring"     },
+  { name: "APP CI Pipelines",     status: "up",  category: "CI/CD"          },
+  { name: "Splunk-AWS-DTRA",      status: "maintenance",    category: "Monitoring"     },
   { name: "Grafana-On-Prem",      status: "up",    category: "Monitoring"     },
   { name: "Grafana-DTRA",         status: "up",    category: "Monitoring"     },
   { name: "PrismaCloud-On-Prem",  status: "up",    category: "Security"       },
   { name: "PrismaCloud-DTRA",     status: "up",    category: "Security"       },
   { name: "Rancher-AWS",          status: "up",    category: "Infrastructure" },
-  { name: "Coder-On-Prem",        status: "up",    category: "Infrastructure" },
-  { name: "Sonarqube-DEPOT",      status: "down",    category: "CI/CD"          },
+  { name: "Coder-On-Prem",        status: "maintenance",    category: "Infrastructure" },
+  { name: "Sonarqube-DEPOT",      status: "up",    category: "CI/CD"          },
   { name: "MINES-env3",           status: "up",    category: "Applications"   },
-  { name: "MINES-env2",           status: "maintenance",    category: "Applications"   },
-  { name: "MINES-env1",           status: "up",    category: "Applications"   },
+  { name: "MINES-env2",           status: "up",    category: "Applications"   },
+  { name: "MINES-env1",           status: "down",    category: "Applications"   },
   { name: "MINES-TEST",           status: "up",    category: "Applications"   },
   { name: "MINES-STAGING",        status: "up",    category: "Applications"   },
   { name: "MINES-PROD",           status: "up",    category: "Applications"   },
@@ -362,7 +395,7 @@ function buildPills() {
     p.className = 'pill' + (f.key === activeType ? ' active' : '');
     p.textContent = (f.icon ? f.icon + ' ' : '') + f.label;
     p.dataset.key = f.key;
-    p.addEventListener('click', () => { activeType = f.key; syncPills(); syncAllCard(); renderCards(); });
+    p.addEventListener('click', () => { activeType = f.key; syncPills(); syncSummaryCards(); renderCards(); });
     typeRow.appendChild(p);
   });
 
@@ -372,7 +405,7 @@ function buildPills() {
     p.textContent = f.label;
     p.dataset.key = f.key;
     p.dataset.cls = f.cls || '';
-    p.addEventListener('click', () => { activeStatus = f.key; syncPills(); syncAllCard(); renderCards(); });
+    p.addEventListener('click', () => { activeStatus = f.key; syncPills(); syncSummaryCards(); renderCards(); });
     statusRow.appendChild(p);
   });
 }
@@ -392,15 +425,33 @@ function clearFilters() {
   activeType   = 'all';
   activeStatus = 'all';
   syncPills();
-  syncAllCard();
+  syncSummaryCards();
   renderCards();
 }
 
-// ─── Dim/enable the All card based on whether filters are active ───
-function syncAllCard() {
-  const card = document.getElementById('card-all');
+// ─── Toggle status filter via summary card (tap same status again → off) ───
+function toggleSummaryFilter(status) {
+  activeStatus = (activeStatus === status) ? 'all' : status;
+  syncPills();
+  syncSummaryCards();
+  renderCards();
+}
+
+// ─── Sync all four summary-card highlight + dim states ───
+function syncSummaryCards() {
   const filtersActive = (activeType !== 'all' || activeStatus !== 'all');
-  card.classList.toggle('no-filters', !filtersActive);
+
+  // All card: dim when nothing active, highlight when something is
+  const allCard = document.getElementById('card-all');
+  allCard.classList.toggle('no-filters',    !filtersActive);
+  allCard.classList.toggle('active-filter',  filtersActive);
+
+  // Status cards: highlight only the one matching activeStatus
+  ['up','down','maintenance'].forEach(s => {
+    const idMap  = { up:'card-op', down:'card-down', maintenance:'card-maint' };
+    const el     = document.getElementById(idMap[s]);
+    el.classList.toggle('active-filter', activeStatus === s);
+  });
 }
 
 // ─── Filter + render cards ───
