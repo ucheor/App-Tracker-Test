@@ -8,7 +8,7 @@ A beautiful, real-time status dashboard for monitoring infrastructure and applic
 ## 🌐 Live Dashboard
 
 **Access the live dashboard at:**
-👉 **https://ucheor.github.io/Demo-github-project/**
+👉 **https://ucheor.github.io/App-Tracker-Test/**
 
 ## 📋 Features
 
@@ -23,7 +23,7 @@ A beautiful, real-time status dashboard for monitoring infrastructure and applic
 
 ### View the Dashboard
 
-Simply open: https://ucheor.github.io/Demo-github-project/
+Simply open: https://ucheor.github.io/App-Tracker-Test/
 
 ### Update System Status
 
@@ -80,7 +80,7 @@ const applications = [
 
 ```html
 <iframe 
-  src="https://ucheor.github.io/Demo-github-project/" 
+  src="https://ucheor.github.io/App-Tracker-Test/" 
   width="100%" 
   height="1400" 
   frameborder="0"
@@ -91,7 +91,7 @@ const applications = [
 ### In Confluence:
 1. Edit your Confluence page
 2. Type `/iframe` or insert "HTML" macro
-3. Paste the URL: `https://ucheor.github.io/Demo-github-project/`
+3. Paste the URL: `https://ucheor.github.io/App-Tracker-Test/`
 4. Set width: `100%`, height: `1400px`
 5. Publish!
 
